@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/yimsoijoi/filmhandler/datamodel"
@@ -11,9 +14,11 @@ import (
 type CreateCustomerReq struct {
 	Name   string `json:"name"`
 	Tel    string `json:"tel"`
-	Email  string `json:"e-mail"`
+	Email  string `json:"email"`
 	Social string `json:"social_network"`
 }
+
+//ใช
 
 func (h *handler) CreateCustomer(c *fiber.Ctx) error {
 	var req CreateCustomerReq
@@ -24,20 +29,39 @@ func (h *handler) CreateCustomer(c *fiber.Ctx) error {
 		})
 	}
 
-	customer := datamodel.NewCustomer(datamodel.Info(req.Name), datamodel.Info(req.Tel), datamodel.Info(req.Email), datamodel.Info(req.Social))
-	customers := []*datamodel.Customer{}
-	for _, tel := range customers {
-		var _tel datamodel.Customer
-		findtel := h.pg.WithContext(c.Context()).Where("tel = ?", tel.Tel).First(&_tel)
-		if errors.Is(gorm.ErrRecordNotFound, findtel.Error) {
-			h.pg.WithContext(c.Context()).Create(&customer)
-		} else {
-			return c.Status(400).JSON(map[string]interface{}{
-				"error message": "duplicate tel",
-			})
+	var checkCust datamodel.Customer
+	if tx := h.pg.WithContext(c.Context()).Where("tel = ?", req.Tel).First(&checkCust); errors.Is(
+		gorm.ErrRecordNotFound,
+		tx.Error) {
+		// Try to parse social JSON
+		var socialData datamodel.SocialData
+		if err := json.Unmarshal([]byte(req.Social), &socialData); err != nil {
+			log.Println("failed to unmarshal socialData JSON:", req.Social)
 		}
-
+		fmt.Println(socialData)
+		customer := datamodel.NewCustomer(
+			datamodel.Info(req.Name),
+			datamodel.Info(req.Tel),
+			datamodel.Info(req.Email),
+			datamodel.Info(req.Social))
+		h.pg.WithContext(c.Context()).Create(&customer)
+		return c.Status(201).JSON(customer)
 	}
 
-	return c.Status(201).JSON(customer)
+	return c.Status(400).JSON(map[string]interface{}{
+		"error": "duplicate tel",
+	})
 }
+
+// // Want ALL datamodel.Customers - find ALL customers
+// customers := []*datamodel.Customer{}
+// h.pg.WithContext(c.Context()).Find(&customers)
+
+// // Loop through customers
+// for _, cust := range customers {
+// 	if cust.Tel == datamodel.Info(req.Tel) {
+// 		return c.Status(400).JSON(map[string]interface{}{
+// 			"error": "duplicate tel",
+// 		})
+// 	}
+// }

@@ -1,14 +1,16 @@
 package handler
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/yimsoijoi/filmhandler/datamodel"
+)
 
 type CreateOrderReq struct {
-	Name     string `json:"name"`
 	Tel      string `json:"tel"`
-	Email    string `json:"e-mail"`
-	FilmNo   int    `json:"filmnumber"`
-	FilmName string `json:"filmname"`
-	FilmType string `json:"filmtype"`
+	Email    string `json:"email"`
+	FilmNo   int    `json:"film_number"`
+	FilmName string `json:"film_name"`
+	FilmType string `json:"film_type"`
 	Status   string `json:"status"`
 	Keep     bool   `json:"keep"`
 }
@@ -21,5 +23,14 @@ func (h *handler) CreateOrder(c *fiber.Ctx) error {
 			"error":         err.Error(),
 		})
 	}
-	return nil
+	order := datamodel.NewOrder(
+		datamodel.Info(req.Tel),
+		req.FilmNo,
+		req.FilmName,
+		req.FilmType,
+		req.Status,
+		req.Keep)
+
+	h.pg.WithContext(c.Context()).Create(&order)
+	return c.Status(201).JSON(order)
 }

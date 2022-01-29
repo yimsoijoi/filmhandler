@@ -1,0 +1,7 @@
+padding: 4
+postgres:
+  port: "5432"
+  username: "postgres"
+  host: "localhost"
+  password: "Godisgay!666"
+  migrate: true
