@@ -40,10 +40,10 @@ func (h *handler) CreateCustomer(c *fiber.Ctx) error {
 		}
 		fmt.Println(socialData)
 		customer := datamodel.NewCustomer(
-			datamodel.Info(req.Name),
-			datamodel.Info(req.Tel),
-			datamodel.Info(req.Email),
-			datamodel.Info(req.Social))
+			(req.Name),
+			(req.Tel),
+			(req.Email),
+			(req.Social))
 		h.pg.WithContext(c.Context()).Create(&customer)
 		return c.Status(201).JSON(customer)
 	}

@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/yimsoijoi/filmhandler/datamodel"
+	"gorm.io/gorm"
 )
 
 type CreateOrderReq struct {
@@ -23,14 +26,23 @@ func (h *handler) CreateOrder(c *fiber.Ctx) error {
 			"error":         err.Error(),
 		})
 	}
+	var checkCust datamodel.Customer
+	if tx := h.pg.WithContext(c.Context()).Where("tel = ?", req.Tel).First(&checkCust); errors.Is(gorm.ErrRecordNotFound, tx.Error) {
+		return c.Status(400).Send([]byte("customer not found"))
+	}
 	order := datamodel.NewOrder(
-		datamodel.Info(req.Tel),
+		(req.Tel),
 		req.FilmNo,
 		req.FilmName,
 		req.FilmType,
 		req.Status,
-		req.Keep)
+		req.Keep,
+	)
 
-	h.pg.WithContext(c.Context()).Create(&order)
+	if tx := h.pg.WithContext(c.Context()).Create(&order); tx.Error != nil {
+		return c.Status(500).JSON(map[string]interface{}{
+			"error": "failed to create order",
+		})
+	}
 	return c.Status(201).JSON(order)
 }

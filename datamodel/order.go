@@ -9,7 +9,7 @@ import (
 
 type Order struct {
 	OrdUuid   string    `json:"order_uuid" gorm:"primaryKey;column:uuid;not null"`
-	CustTel   Info      `json:"cust_tel" gorm:"column:cust_tel;not null"`
+	CustTel   string    `json:"cust_tel" gorm:"column:cust_tel;not null"`
 	Customer  Customer  `json:"customer" gorm:"foreignKey:CustTel;references:Tel;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;not null"`
 	FilmNo    string    `json:"film_number" gorm:"foreignKey;column:filmnumber;not null"`
 	FilmName  string    `json:"film_name" gorm:"column:filmname;not null"`
@@ -22,7 +22,7 @@ type Order struct {
 	//มี json เพื่อสำหรับให้fiber marshal ก่อนส่งกลับไป
 }
 
-func NewOrder(tel Info, fnum int, fname string, ftype string, status string, keep bool) *Order {
+func NewOrder(tel string, fnum int, fname string, ftype string, status string, keep bool) *Order {
 	_fnum := fmt.Sprintf("%04d", fnum) //pad zeroes of length
 	return &Order{
 		OrdUuid:  uuid.NewString(),

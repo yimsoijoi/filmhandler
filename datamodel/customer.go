@@ -4,13 +4,13 @@ import (
 	"time"
 )
 
-type Info string
+// type stringstring
 type Customer struct {
-	// Uuid      Info      `json:"uuid" gorm:"primaryKey;column:uuid;not null"`
-	Tel        Info      `json:"tel" gorm:"primaryKey;column:tel;not null"`
-	Name       Info      `json:"name" gorm:"column:name;not null"`
-	Email      Info      `json:"email" gorm:"column:email;not null"`
-	Social     Info      `json:"social_network" gorm:"column:social_network"`
+	// Uuid      string     `json:"uuid" gorm:"primaryKey;column:uuid;not null"`
+	Tel        string    `json:"tel" gorm:"primaryKey;column:tel;not null"`
+	Name       string    `json:"name" gorm:"column:name;not null"`
+	Email      string    `json:"email" gorm:"column:email;not null"`
+	Social     string    `json:"social_network" gorm:"column:social_network"`
 	SocialData string    `json:"-"`
 	CreatedAt  time.Time `json:"-" gorm:"autoCreateTime"`
 	UpdatedAt  time.Time `json:"-" gorm:"autoUpdateTime"`
@@ -18,9 +18,9 @@ type Customer struct {
 
 type SocialData map[string]string
 
-func NewCustomer(name Info, tel Info, email Info, social Info) *Customer {
+func NewCustomer(name string, tel string, email string, social string) *Customer {
 	return &Customer{
-		// Uuid:      Info(uuid.NewString()),
+		// Uuid:      string(uuid.NewString()),
 		Tel:    tel,
 		Name:   name,
 		Email:  email,
